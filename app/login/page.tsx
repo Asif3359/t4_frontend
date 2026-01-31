@@ -10,6 +10,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { StatusMessage } from "@/components/StatusMessage";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function LoginPage() {
   // useId() is stable between server and client — avoids hydration mismatch (Math.random is not).
   const emailId = useId();
   const passwordId = useId();
+  const [remember, setRemember] = useState(false);
 
   // Redirect only in an effect so we don't update Router during render.
   useEffect(() => {
@@ -67,8 +69,8 @@ export default function LoginPage() {
   if (user) return null;
 
   return (
-    <div className="container py-5">
-      <nav className="navbar navbar-light mb-4">
+    <div className="min-vh-100 d-flex flex-column">
+      <nav className="navbar navbar-light bg-light border-bottom">
         <div className="container-fluid">
           <span
             className="navbar-brand mb-0"
@@ -90,70 +92,124 @@ export default function LoginPage() {
         </div>
       </nav>
 
-      <div className="row justify-content-center">
-        <div className="col-md-6 col-lg-5">
-          <h2 className="mb-4">Login</h2>
-          {status && (
-            <StatusMessage
-              message={status.message}
-              variant={status.variant}
-              onDismiss={() => setStatus(null)}
-            />
-          )}
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor={emailId} className="form-label">
-                Email
-              </label>
-              <input
-                id={emailId}
-                type="email"
-                className="form-control"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                autoComplete="email"
-                title="Enter your email address"
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-                suppressHydrationWarning
+      <main className="flex-grow-1 d-flex justify-content-center align-items-center py-4 px-2 px-sm-3">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-12 col-sm-11 col-md-10 col-lg-8 col-xl-6 mx-auto">
+              <div className="card shadow-sm border-0 rounded-3">
+                <div className="card-body p-4 p-sm-5">
+                  <h2 className="mb-4 text-center">Login</h2>
+                  {status && (
+                    <StatusMessage
+                      message={status.message}
+                      variant={status.variant}
+                      onDismiss={() => setStatus(null)}
+                    />
+                  )}
+                  <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                      <label htmlFor={emailId} className="form-label">
+                        Email
+                      </label>
+                      <input
+                        id={emailId}
+                        type="email"
+                        className="form-control"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        title="Enter your email address"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        suppressHydrationWarning
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor={passwordId} className="form-label">
+                        Password
+                      </label>
+                      <input
+                        id={passwordId}
+                        type="password"
+                        className="form-control"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="•••"
+                        autoComplete="current-password"
+                        title="Enter your password"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        suppressHydrationWarning
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check">
+                        <input
+                          id="remember"
+                          type="checkbox"
+                          className="form-check-input me-2"
+                          checked={remember}
+                          onChange={() => setRemember(!remember)}
+                          title="Remember me"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                        />
+                        <label className="form-check-label" htmlFor="remember">
+                          Remember me
+                        </label>
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-100"
+                      disabled={loading}
+                      title="Sign in"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                    >
+                      {loading ? "Signing in…" : "Login"}
+                    </button>
+                  </form>
+                  <div className="mt-4 pt-2 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 text-center text-sm-start">
+                    <p className="mb-0 text-muted small">
+                      No account?{" "}
+                      <Link
+                        href="/register"
+                        className="text-primary"
+                        title="Create account"
+                        data-bs-toggle="tooltip"
+                      >
+                        Register here
+                      </Link>
+                    </p>
+                    <Link
+                      href="/"
+                      className="text-muted small"
+                      title="Forgot password?"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                    >
+                      Forgot password{" "}
+                      <i className="bi bi-question-circle" aria-hidden />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-12 col-sm-11 col-md-10 col-lg-4 col-xl-4 mx-auto mt-4 mt-lg-0 d-flex justify-content-center align-items-center d-none d-lg-flex">
+              <Image
+                src="/login.png"
+                alt="Login"
+                width={400}
+                height={400}
+                className="img-fluid rounded"
+                style={{ maxWidth: "100%", height: "auto" }}
               />
             </div>
-            <div className="mb-3">
-              <label htmlFor={passwordId} className="form-label">
-                Password
-              </label>
-              <input
-                id={passwordId}
-                type="password"
-                className="form-control"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="•••"
-                autoComplete="current-password"
-                title="Enter your password"
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-                suppressHydrationWarning
-              />
-            </div>
-            <button
-              type="submit"
-              className="btn btn-primary w-100"
-              disabled={loading}
-              title="Sign in"
-              data-bs-toggle="tooltip"
-              data-bs-placement="top"
-            >
-              {loading ? "Signing in…" : "Login"}
-            </button>
-          </form>
-          <p className="mt-3 text-muted small">
-            Users can login and manage other users even if their e-mails are
-            unverified.
-          </p>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

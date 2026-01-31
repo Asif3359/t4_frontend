@@ -347,18 +347,18 @@ export default function UsersPage() {
                 E-mail
               </th>
               <th
-                title="Time of last sign-in"
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-              >
-                Last login time
-              </th>
-              <th
                 title="unverified / active / blocked"
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
               >
                 Status
+              </th>
+              <th
+                title="Time of last sign-in"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+              >
+                Last login time
               </th>
             </tr>
           </thead>
@@ -393,8 +393,8 @@ export default function UsersPage() {
                   </td>
                   <td>{u.name}</td>
                   <td>{u.email}</td>
-                  <td>{formatLastLogin(u.last_login)}</td>
                   <td>{u.status}</td>
+                  <td>{formatLastLogin(u.last_login)}</td>
                 </tr>
               ))
             )}
