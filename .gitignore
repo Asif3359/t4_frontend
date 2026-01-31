@@ -39,3 +39,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+apidoc.md
+TASK5_FRONTEND_CHECKLIST.md
