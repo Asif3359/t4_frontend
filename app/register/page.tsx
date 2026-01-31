@@ -68,11 +68,12 @@ export default function RegisterPage() {
   );
 
   return (
-    <div className="container py-5">
-      <nav className="navbar navbar-light mb-4">
-        <div className="container-fluid">
+    <div className="min-vh-100 d-flex flex-column">
+      <nav className="navbar navbar-light bg-light border-bottom">
+        <div className="container-fluid px-2 px-sm-3">
           <span
-            className="navbar-brand mb-0"
+            className="navbar-brand mb-0 text-truncate me-2"
+            style={{ maxWidth: "50vw" }}
             title="User Management"
             data-bs-toggle="tooltip"
             data-bs-placement="bottom"
@@ -91,86 +92,102 @@ export default function RegisterPage() {
         </div>
       </nav>
 
-      <div className="row justify-content-center">
-        <div className="col-md-6 col-lg-5">
-          <h2 className="mb-4">Register</h2>
-          {status && (
-            <StatusMessage
-              message={status.message}
-              variant={status.variant}
-              onDismiss={() => setStatus(null)}
-            />
-          )}
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor={nameId} className="form-label">
-                Name
-              </label>
-              <input
-                id={nameId}
-                type="text"
-                className="form-control"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
-                autoComplete="name"
-                title="Enter your full name"
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-              />
+      <main className="flex-grow-1 d-flex justify-content-center align-items-center py-4 px-2 px-sm-3">
+        <div className="container w-100">
+          <div className="row justify-content-center">
+            <div className="col-12 col-sm-11 col-md-10 col-lg-8 col-xl-6 mx-auto">
+              <div className="card shadow-sm border-0 rounded-3">
+                <div className="card-body p-4 p-sm-5">
+                  <h2 className="mb-4 text-center">Register</h2>
+                  {status && (
+                    <StatusMessage
+                      message={status.message}
+                      variant={status.variant}
+                      onDismiss={() => setStatus(null)}
+                    />
+                  )}
+                  <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                      <label htmlFor={nameId} className="form-label">
+                        Name
+                      </label>
+                      <input
+                        id={nameId}
+                        type="text"
+                        className="form-control"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your name"
+                        autoComplete="name"
+                        title="Enter your full name"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor={emailId} className="form-label">
+                        Email
+                      </label>
+                      <input
+                        id={emailId}
+                        type="email"
+                        className="form-control"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        title="Enter your email address"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor={passwordId} className="form-label">
+                        Password
+                      </label>
+                      <input
+                        id={passwordId}
+                        type="password"
+                        className="form-control"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Any non-empty password (e.g. one character)"
+                        autoComplete="new-password"
+                        title="Any non-empty password is allowed"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-100"
+                      disabled={loading}
+                      title="Create account"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                    >
+                      {loading ? "Registering…" : "Register"}
+                    </button>
+                  </form>
+                  <div className="mb-3">
+                    <div className="text-center mt-2">
+                      If already have an account, you can{" "}
+                      <Link href="/login" className="text-primary">
+                        login here
+                      </Link>
+                    </div>
+                  </div>
+                  <p className="mt-3 mb-0 text-muted small text-center">
+                    You can use any non-empty password (even one character).
+                    After registration, check your email to verify and change
+                    status to active.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="mb-3">
-              <label htmlFor={emailId} className="form-label">
-                Email
-              </label>
-              <input
-                id={emailId}
-                type="email"
-                className="form-control"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                autoComplete="email"
-                title="Enter your email address"
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor={passwordId} className="form-label">
-                Password
-              </label>
-              <input
-                id={passwordId}
-                type="password"
-                className="form-control"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Any non-empty password (e.g. one character)"
-                autoComplete="new-password"
-                title="Any non-empty password is allowed"
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-              />
-            </div>
-            <button
-              type="submit"
-              className="btn btn-primary w-100"
-              disabled={loading}
-              title="Create account"
-              data-bs-toggle="tooltip"
-              data-bs-placement="top"
-            >
-              {loading ? "Registering…" : "Register"}
-            </button>
-          </form>
-          <p className="mt-3 text-muted small">
-            You can use any non-empty password (even one character). After
-            registration, check your email to verify and change status to
-            active.
-          </p>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
