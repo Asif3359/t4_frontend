@@ -91,10 +91,16 @@ export default function UsersPage() {
     });
   }, [users, selectedIds]);
 
+  /** Users that can be selected (exclude current user). */
+  const selectableUsers = useMemo(
+    () => (user ? users.filter((u) => u.id !== user.id) : users),
+    [users, user]
+  );
+
   const allSelected = useMemo(() => {
-    if (users.length === 0) return false;
-    return users.every((u) => selectedIds.has(u.id));
-  }, [users, selectedIds]);
+    if (selectableUsers.length === 0) return false;
+    return selectableUsers.every((u) => selectedIds.has(u.id));
+  }, [selectableUsers, selectedIds]);
 
   const someSelected = selectedIds.size > 0;
   const selectedList = useMemo(() => Array.from(selectedIds), [selectedIds]);
@@ -102,6 +108,11 @@ export default function UsersPage() {
   // useId() is stable between server and client — avoids hydration mismatch.
   const headerCheckId = useId();
   const headerCheckRef = useRef<HTMLInputElement | null>(null);
+
+  const isCurrentUser = useCallback(
+    (id: number) => user != null && user.id === id,
+    [user]
+  );
 
   useEffect(() => {
     const el = headerCheckRef.current;
@@ -113,9 +124,9 @@ export default function UsersPage() {
     if (allSelected) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(users.map((u) => u.id)));
+      setSelectedIds(new Set(selectableUsers.map((u) => u.id)));
     }
-  }, [allSelected, users]);
+  }, [allSelected, selectableUsers]);
 
   const toggleOne = useCallback((id: number) => {
     setSelectedIds((prev) => {
@@ -392,7 +403,9 @@ export default function UsersPage() {
                     </td>
                   </tr>
                 ) : (
-                  users.map((u) => (
+                  users.map((u) => {
+                    const currentUserRow = isCurrentUser(u.id);
+                    return (
                     <tr key={u.id}>
                       <td className="text-center">
                         <input
@@ -400,9 +413,10 @@ export default function UsersPage() {
                           type="checkbox"
                           className="form-check-input"
                           checked={selectedIds.has(u.id)}
-                          onChange={() => toggleOne(u.id)}
-                          aria-label={`Select ${u.name}`}
-                          title={`Select ${u.name}`}
+                          disabled={currentUserRow}
+                          onChange={() => !currentUserRow && toggleOne(u.id)}
+                          aria-label={currentUserRow ? "Current user (cannot select)" : `Select ${u.name}`}
+                          title={currentUserRow ? "Current user (cannot select)" : `Select ${u.name}`}
                           data-bs-toggle="tooltip"
                           data-bs-placement="top"
                         />
@@ -414,7 +428,8 @@ export default function UsersPage() {
                         {formatLastLogin(u.last_login)}
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 )}
               </tbody>
             </table>
