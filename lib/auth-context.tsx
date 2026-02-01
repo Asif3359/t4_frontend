@@ -54,7 +54,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem(USER_KEY);
       }
     }
-    // Note: Schedule state update so effect does not trigger cascading setState synchronously.
     const id = setTimeout(() => {
       if (parsed && t) {
         setUser(parsed);

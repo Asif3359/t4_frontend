@@ -23,12 +23,10 @@ export default function LoginPage() {
     variant: "success" | "danger";
   } | null>(null);
 
-  // useId() is stable between server and client — avoids hydration mismatch (Math.random is not).
   const emailId = useId();
   const passwordId = useId();
   const [remember, setRemember] = useState(false);
 
-  // Redirect only in an effect so we don't update Router during render.
   useEffect(() => {
     if (user) router.replace("/users");
   }, [user, router]);
@@ -52,7 +50,6 @@ export default function LoginPage() {
           router.push("/users");
           return;
         }
-        // Unauthorized or wrong credentials: keep error status visible until user dismisses or retries.
         setStatus({ message: res.error || "Login failed.", variant: "danger" });
       } catch (err) {
         setStatus({

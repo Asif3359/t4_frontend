@@ -19,7 +19,6 @@ export default function RegisterPage() {
     variant: "success" | "danger";
   } | null>(null);
 
-  // useId() is stable between server and client — avoids hydration mismatch.
   const nameId = useId();
   const emailId = useId();
   const passwordId = useId();
@@ -56,8 +55,16 @@ export default function RegisterPage() {
           });
         }
       } catch (err) {
+        const rawMessage =
+          err instanceof Error ? err.message : "Registration failed.";
+
+        const isDuplicateEmail = /already|duplicate|unique|exists/i.test(
+          rawMessage,
+        );
         setStatus({
-          message: err instanceof Error ? err.message : "Registration failed.",
+          message: isDuplicateEmail
+            ? "This email is already registered. Please log in or use a different email."
+            : rawMessage,
           variant: "danger",
         });
       } finally {

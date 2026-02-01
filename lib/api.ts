@@ -1,7 +1,7 @@
 /**
  * API client and utilities.
  * Important: All requests (except register/login) must send the JWT;
- * on 401 the client redirects to login (user blocked or deleted).
+ * on 401 the client redirects to login.
  */
 
 const API_BASE =
@@ -9,7 +9,6 @@ const API_BASE =
     ? process.env.NEXT_PUBLIC_API_URL
     : "http://localhost:5000";
 
-/** Nota bene: Used to generate unique DOM ids for accessibility and tooltips. */
 export function getUniqIdValue(prefix: string): string {
   return `${prefix}-${Math.random().toString(36).slice(2, 11)}`;
 }
@@ -41,7 +40,6 @@ export interface User {
   last_login: string | null;
 }
 
-/** Important: On 401 (user blocked/deleted) we redirect to login; no other request logic. */
 async function request<T>(
   path: string,
   options: RequestInit & { token?: string | null } = {}
@@ -56,7 +54,6 @@ async function request<T>(
   const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
   const data = (await res.json().catch(() => ({}))) as ApiResponse<T>;
   if (res.status === 401) {
-    // Only redirect when a protected request fails (user blocked/deleted). Login 401 = wrong credentials, show error.
     if (token) onUnauthorized();
     throw new Error(data.error || data.message || "Unauthorized");
   }

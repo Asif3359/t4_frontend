@@ -1,12 +1,5 @@
 "use client";
 
-/**
- * User management (admin panel). Only authenticated non-blocked users.
- * Table: checkbox, name, email, last login time, status.
- * Toolbar: Block (text), Unblock (icon), Delete (icon), Delete unverified (icon).
- * Important: No buttons in data rows; selection and toolbar only.
- */
-
 import Link from "next/link";
 import {
   useCallback,
@@ -21,7 +14,6 @@ import type { User } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { StatusMessage } from "@/components/StatusMessage";
 
-/** Note: Last login comes from API; we display "—" when null or empty. */
 function formatLastLogin(value: string | null): string {
   if (value == null || value === "") return "—";
   try {
@@ -65,7 +57,6 @@ export default function UsersPage() {
     loadUsers();
   }, [token, loadUsers]);
 
-  // Nota bene: Re-initialize Bootstrap tooltips when table content changes.
   useEffect(() => {
     if (
       typeof window === "undefined" ||
@@ -85,34 +76,20 @@ export default function UsersPage() {
     document.querySelectorAll("[data-bs-toggle='tooltip']").forEach((el) => {
       try {
         new bt.Tooltip(el);
-      } catch {
-        // already initialized
-      }
+      } catch {}
     });
   }, [users, selectedIds]);
 
-  /** Users that can be selected (exclude current user). */
-  const selectableUsers = useMemo(
-    () => (user ? users.filter((u) => u.id !== user.id) : users),
-    [users, user]
-  );
-
   const allSelected = useMemo(() => {
-    if (selectableUsers.length === 0) return false;
-    return selectableUsers.every((u) => selectedIds.has(u.id));
-  }, [selectableUsers, selectedIds]);
+    if (users.length === 0) return false;
+    return users.every((u) => selectedIds.has(u.id));
+  }, [users, selectedIds]);
 
   const someSelected = selectedIds.size > 0;
   const selectedList = useMemo(() => Array.from(selectedIds), [selectedIds]);
 
-  // useId() is stable between server and client — avoids hydration mismatch.
   const headerCheckId = useId();
   const headerCheckRef = useRef<HTMLInputElement | null>(null);
-
-  const isCurrentUser = useCallback(
-    (id: number) => user != null && user.id === id,
-    [user]
-  );
 
   useEffect(() => {
     const el = headerCheckRef.current;
@@ -124,9 +101,9 @@ export default function UsersPage() {
     if (allSelected) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(selectableUsers.map((u) => u.id)));
+      setSelectedIds(new Set(users.map((u) => u.id)));
     }
-  }, [allSelected, selectableUsers]);
+  }, [allSelected, users]);
 
   const toggleOne = useCallback((id: number) => {
     setSelectedIds((prev) => {
@@ -137,7 +114,6 @@ export default function UsersPage() {
     });
   }, []);
 
-  /** Nota bene: Single helper for block/unblock/delete so status and refresh are consistent. */
   const runAction = useCallback(
     async (
       fn: () => Promise<unknown>,
@@ -166,12 +142,30 @@ export default function UsersPage() {
 
   const onBlock = useCallback(() => {
     if (selectedList.length === 0) return;
-    runAction(
-      () => api.blockUsers(token!, selectedList),
-      "Users blocked.",
-      "Failed to block users.",
-    );
-  }, [token, selectedList, runAction]);
+    if (!token) return;
+    setActionLoading(true);
+    setStatus(null);
+    api
+      .blockUsers(token, selectedList)
+      .then(() => {
+        if (user && selectedList.includes(user.id)) {
+          logout();
+          window.location.href = "/login";
+          return;
+        }
+        setStatus({ message: "Users blocked.", variant: "success" });
+        setSelectedIds(new Set());
+        return loadUsers();
+      })
+      .catch((err) => {
+        setStatus({
+          message:
+            err instanceof Error ? err.message : "Failed to block users.",
+          variant: "danger",
+        });
+      })
+      .finally(() => setActionLoading(false));
+  }, [token, selectedList, user, logout, loadUsers]);
 
   const onUnblock = useCallback(() => {
     if (selectedList.length === 0) return;
@@ -211,6 +205,25 @@ export default function UsersPage() {
     }, 2000);
     return () => clearTimeout(id);
   }, [user]);
+
+  if (!token) {
+    return (
+      <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center py-5 px-3">
+        <div className="text-center">
+          <p className="text-danger mb-3">Access denied. Please log in.</p>
+          <Link
+            href="/login"
+            className="btn btn-primary"
+            title="Open login page"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+          >
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -280,7 +293,6 @@ export default function UsersPage() {
             />
           )}
 
-          {/* Toolbar over table: Block (text), Unblock (icon), Delete (icon), Delete unverified (icon). */}
           <div className="d-flex flex-wrap align-items-center gap-2 mb-2 p-2 border rounded bg-light">
             <button
               type="button"
@@ -403,9 +415,7 @@ export default function UsersPage() {
                     </td>
                   </tr>
                 ) : (
-                  users.map((u) => {
-                    const currentUserRow = isCurrentUser(u.id);
-                    return (
+                  users.map((u) => (
                     <tr key={u.id}>
                       <td className="text-center">
                         <input
@@ -413,10 +423,9 @@ export default function UsersPage() {
                           type="checkbox"
                           className="form-check-input"
                           checked={selectedIds.has(u.id)}
-                          disabled={currentUserRow}
-                          onChange={() => !currentUserRow && toggleOne(u.id)}
-                          aria-label={currentUserRow ? "Current user (cannot select)" : `Select ${u.name}`}
-                          title={currentUserRow ? "Current user (cannot select)" : `Select ${u.name}`}
+                          onChange={() => toggleOne(u.id)}
+                          aria-label={`Select ${u.name}`}
+                          title={`Select ${u.name}`}
                           data-bs-toggle="tooltip"
                           data-bs-placement="top"
                         />
@@ -428,8 +437,7 @@ export default function UsersPage() {
                         {formatLastLogin(u.last_login)}
                       </td>
                     </tr>
-                    );
-                  })
+                  ))
                 )}
               </tbody>
             </table>
